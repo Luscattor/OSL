@@ -1,0 +1,31 @@
+
+shader grade(
+    color Cin = color(0,0,0),
+
+    color blackPoint = color(0,0,0),
+    color whitePoint = color(1,1,1),
+
+    color lift = color(0,0,0),
+    color gain = color(1,1,1),
+    color multiply = color(1,1,1),
+    color offset = color(0,0,0),
+    color gamma = color(1,1,1),
+
+    output color Cout = color(0,0,0)
+)
+
+{
+    color grade = color(0,0,0);
+
+    color adjustValueBlack = Cin-blackPoint;
+    color adjustValueWhite = (Cin - blackPoint)/(whitePoint-blackPoint);
+    adjustValueWhite = max(0, min(1, adjustValueWhite));
+
+    grade = adjustValueWhite;
+    grade = (grade - 1) * (1 - lift) + 1;
+    grade = grade * multiply;
+    grade = pow(grade, 1.0 / gamma);
+    grade = grade + offset;
+    grade = grade * gain;
+    Cout = grade;
+}

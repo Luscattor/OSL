@@ -1,0 +1,42 @@
+point iterative_distortion_with_logging(point P, float initial_scale, int iterations, float scale_decay, float anim_time) {
+    point distortedP = P;
+    float current_scale = initial_scale;
+
+    // Boucle sur le nombre d'itérations
+    for (int i = 0; i < iterations; ++i) {
+        // Calcul de la distorsion actuelle
+        vector distortion = vector(noise("perlin", distortedP * current_scale + anim_time));
+
+        // Application de la distorsion à la position actuelle du point
+        distortedP += distortion * (1.0 / (i + 1));  // Ajoute une distorsion qui diminue à chaque itération
+
+        // Log de l'état actuel après chaque itération
+        printf("Itération %02d :\n", i + 1);
+        printf("Distortion %02d : [%f, %f, %f]\n", i + 1, distortion[0], distortion[1], distortion[2]);
+        printf("Position après distorsion %02d : [%f, %f, %f]\n", i + 1, distortedP[0], distortedP[1], distortedP[2]);
+
+        // Réduction de l'échelle pour la prochaine itération
+        current_scale *= scale_decay;
+    }
+
+    return distortedP;
+}
+
+shader iterative_noise_shader(
+    color color1 = color(1, 0, 0), // Rouge
+    color color2 = color(0, 1, 0), // Vert
+    float noise_scale = 1.0,
+    float distortion_scale = 1.0, // Scale initiale de la distorsion
+    int iterations = 4, // Nombre d'itérations
+    float scale_decay = 0.5, // Décroissance de l'échelle à chaque itération
+    float anim_time = 0.0, // Paramètre temps pour animer la distorsion
+    output color result = 0)
+{
+    point localP = transform("common", P); // Transformation du point en espace "commun"
+
+    // Utilisation de la fonction iterative_distortion_with_logging avec le paramètre anim_time
+    localP = iterative_distortion_with_logging(localP, distortion_scale, iterations, scale_decay, anim_time);
+
+    float n = noise("perlin", localP * noise_scale); // Calcul du bruit avec les coordonnées distordues
+    result = mix(color1, color2, n); // Mélange des deux couleurs en fonction du bruit
+}
