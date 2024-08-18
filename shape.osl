@@ -1,0 +1,47 @@
+color safe_mix(color oneColor, color otherColor, float mixValue)
+{
+    return mix(oneColor, otherColor, clamp(mixValue, 0, 1));
+}
+
+/*
+float fract (float in)
+{
+return in - floor(in);
+}
+
+
+float my_function(float in)
+{
+return abs(sin(6.28 * in));
+}
+*/
+
+shader myShader
+(
+color A = color(0,0,0),
+color B = color(1,1,1),
+point UV = point(u,v,0),
+point Center = point(0.5,0.5,0.5),
+float radius = 0.5,
+float width = 0.5,
+float fuzz = 0.05, 
+vector Scale = 1,
+output color result = 0
+)
+
+{
+point ptn = UV ;
+vector diff = ptn - Center;
+
+diff /= Scale;
+
+float f = 0;
+
+float dist = length(diff); 
+
+f = 1 - linearstep(radius, radius + fuzz, dist);
+f *= linearstep(radius - width, radius - width + fuzz, dist);
+//if (dist < radius) f = 1.0 ;
+
+result = safe_mix(A,B, f);
+}
